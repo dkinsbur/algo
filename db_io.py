@@ -54,6 +54,22 @@ class DataBase(object):
 
         return DbBarData(ver, period, symbol, bars)
 
+    def load_last_sample(self, symbol):
+        db_file = self.db_file(symbol)
+        with open(db_file, 'rb') as fl:
+            ver, period, _, _, size, sym = struct.unpack(DataBase.header, fl.read(struct.calcsize(DataBase.header)))
+            assert os.path.getsize(db_file) == struct.calcsize(DataBase.header)+size*struct.calcsize(DataBase.entry)
+            assert size > 0
+            fl.seek(-struct.calcsize(DataBase.entry), 2)
+
+            date, Open, high, low, close, volume = struct.unpack(DataBase.entry, fl.read(struct.calcsize(DataBase.entry)))
+            Open = round(Open, 4)
+            high = round(high, 4)
+            low = round(low, 4)
+            close = round(close, 4)
+
+            return DbBar(date, Open, high, low, close, volume)
+
     def store(self, symbol, bars):
          db_file = self.db_file(symbol)
          with open(db_file, 'wb') as fl:
