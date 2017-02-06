@@ -6,10 +6,6 @@ def calc_missing_bar_days(file_last_day):
     now = datetime.now()
     today = now.date()
 
-    if now.time() <= time(hour=23):
-        print 'the market day is not yet over, we remove today from count...'
-        today -= timedelta(days=1)
-
     print file_last_day, today
 
     days = (today - file_last_day).days
@@ -55,25 +51,32 @@ def update_minute_bars(symbol):
     db = DataBase(base_folder)
 
     if not db.exist(symbol):
-        print 'trying to craete new db file for:', symbol
-        bars = get_google_bars_in_db_format(symbol, 15)
-        if len(bars) > 0:
-            db.store(symbol, bars)
-        else:
-            print 'cannot get symbobars from google'
+        # print 'trying to craete new db file for:', symbol
+        # bars = get_google_bars_in_db_format(symbol, 15)
+        # if len(bars) > 0:
+        #     db.store(symbol, bars)
+        # else:
+        #     print 'cannot get symbobars from google'
 
-        return 
-
+        return
 
     # get last bar in db file
-    data = db.load(symbol)
-    last = data.bars[-1]
+    last = db.load_last_sample(symbol)
 
     # get bars from last in file till today
     file_last_day = datetime.fromtimestamp(last.date).date()
 
     days = calc_missing_bar_days(file_last_day)
+    if days > 15:
+        print 'Too amny days to get ({}). google supports upto 15'.format(days)
+        days = 15
     print 'days to download:', days
+
+    #temp code - do only the ones that are missing many days
+    if days < 4:
+        print 'not handling small days'
+        return
+
     if days > 0:
         g_bars = get_google_bars_in_db_format(symbol, days)
 
@@ -106,3 +109,4 @@ def get_symbol_list():
 if __name__ == '__main__':
     for symbol in get_symbol_list():
         update_minute_bars(symbol)
+
