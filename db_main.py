@@ -6,6 +6,10 @@ def calc_missing_bar_days(file_last_day):
     now = datetime.now()
     today = now.date()
 
+    # if now.time() <= time(hour=23):
+    #     print 'the market day is not yet over, we remove today from count...'
+    #     today -= timedelta(days=1)
+
     print file_last_day, today
 
     days = (today - file_last_day).days
