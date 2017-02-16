@@ -130,7 +130,7 @@ class DasChartCollector(DasBroker):
         self.register(self._msg_handler)
         self.stocks = {}
         self.done_threshold = timedelta(milliseconds=1000)
-        self.timeout = timedelta(seconds=10)
+        self.timeout = timedelta(seconds=15)
         self.terminate = False
 
     def _msg_handler(self, msg):
