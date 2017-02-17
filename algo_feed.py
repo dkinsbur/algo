@@ -5,6 +5,7 @@ class Feed(object):
     def __init__(self):
         self._evt_on_data = []
         self._evt_on_end = []
+        self.abrt = False
 
     def register(self, on_data, on_end):
         if on_data:
@@ -19,8 +20,15 @@ class Feed(object):
         for data in self._get_data_iterator():
             for cb in self._evt_on_data:
                 cb(self, data)
+
+            if self.abrt:
+                return
+
         for cb in self._evt_on_end:
             cb(self)
+
+    def abort(self):
+        self.abrt = True
 
 class Bar(object):
 
@@ -51,7 +59,7 @@ class GoogleFileFeed(Feed):
             assert first_line.strip() == 'DATE,CLOSE,HIGH,LOW,OPEN,VOLUME', [first_line]
             super(GoogleFileFeed, self).go()
 
-import DataBase.bar as bar
+import bar
 class DasFileFeed(Feed):
     def __init__(self, symbol, db_dir):
         super(DasFileFeed, self).__init__()
